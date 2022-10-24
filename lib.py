@@ -169,35 +169,40 @@ class Manager:
         else:
             raise Exception("Entity not found!")
 
-    def open(self, path, mode):  #
+    def open(self, path, mode): 
         file = self.find(path)
 
         if file:
-            file.mode = mode
-            if file.mode == "r":
-                self.open_files[
-                    path
-                ] = file  # Using path as key / Can be changed to file.token
-                print("File:", file.token, "opened for reading.")
-            elif file.mode == "w":
-                self.open_files[path] = file
-                file.enabled = True
-                print("File:", file.token, "opened for writing.")
+            if file not in self.open_files.values(): 
+                file.mode = mode
+                if file.mode == "r":
+                    self.open_files[path] = file  # Using path as key / Can be changed to file.token
+                    print("File:", file.token, "opened for reading.")
+                elif file.mode == "w":
+                    self.open_files[path] = file
+                    file.enabled = True
+                    print("File:", file.token, "opened for writing.")
+                
+            else:
+                print("File is already opened!")
+            
+            return file
 
-            return file  # Returning object
-            # content = file.get_content()
-            # return content
-
+           
         else:
             raise Exception("Entity not found!")
 
     def close(self, path):
         file = self.find(path)
         if file:
-            file.mode = None
-            file.enabled = False
-            del self.open_files[path]
-            print("File:", file.token, "closed.")
+            if file not in self.open_files.values(): 
+                print("File is not opened!")
+            else:    
+                file.mode = None
+                file.enabled = False
+                del self.open_files[path]
+                print("File:", file.token, "closed.")
+
         else:
             raise Exception("Entity not found!")
 
@@ -219,7 +224,7 @@ class Manager:
             else:
                 raise Exception("Entity not enabled for writing!")
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Entity not opended!")
 
     def read_from_file(self, path):
         if path in self.open_files:
@@ -227,7 +232,7 @@ class Manager:
             return file.get_content()
 
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Entity not open!")
 
     def write_to_file_at(self, path, content, offset):
         if path in self.open_files:
@@ -249,7 +254,7 @@ class Manager:
             return txt[offset:offset + size] 
 
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Entity not open!")
     
     def read_from_file_at(self, path, offset): # When size is not defined
         if path in self.open_files:
@@ -258,7 +263,7 @@ class Manager:
             return txt[offset:]  
 
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Entity not open!")
 
     def move_content_in_file(self, path, source, size, destination):
         if path in self.open_files:
@@ -271,7 +276,7 @@ class Manager:
             else:
                 raise Exception("Entity not enabled for writing!")
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Entity not open!")
 
 
             # ABCDEF
