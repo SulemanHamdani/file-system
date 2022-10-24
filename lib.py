@@ -1,36 +1,33 @@
 import datetime
+import os
+
 
 class Entity:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, token, parent=None):
+        self.token = token
         time_stamp = datetime.datetime.now()
         self.created_at = time_stamp
         self.last_modified_at = time_stamp
+        self.parent = parent
 
     def update_time_stamp(self):
         self.last_modified_at = datetime.datetime.now()
 
+
 class File(Entity):
-    def __init__(self, name, location, size = 0):
-        Entity.__init__(self, name)
-        self.size = size # in bytes
-        self.location = location
+    def __init__(self, token, size=0):
+        Entity.__init__(self, token)
+        self.size = size  # in bytes
+        self.mode = None  # 'r' | 'w'
 
     def __str__(self):
-        return f"{self.name}: size: {self.size}"
+        return f"{self.token}: size: {self.size}"
 
-    def rename_file(self, name, new_name):
-        file = self.find_file(name)
-
-        if file: 
-            file.name = new_name
-            return
-
-    def move_file(self, name, new_location):
-        file = self.find_file(name)
+    def retoken_file(self, token, new_token):
+        file = self.find_file(token)
 
         if file:
-            file.location = new_location
+            file.token = new_token
             return
 
     def update_content(self, content):
@@ -42,37 +39,41 @@ class File(Entity):
 
     def update_size(self):
         self.size = len(self.get_content())
-    
+
     def get_size(self):
         return self.size
 
+
 class Folder(Entity):
-    def __init__(self, name, children = []):
-        Entity.__init__(self, name)
-        self.children = children
+    def __init__(self, token):
+        Entity.__init__(self, token)
+        self.children = {}
 
     def __str__(self):
-        file_count = len(list(filter(lambda child: isinstance(child, File), self.children)))
-        folder_count = len(list(filter(lambda child: isinstance(child, Folder), self.children)))
-        return f"{self.name}: {file_count} files and {folder_count} folders" ""
+        file_count = len(
+            list(filter(lambda child: isinstance(child, File), self.children))
+        )
+        folder_count = len(
+            list(filter(lambda child: isinstance(child, Folder), self.children))
+        )
+        return f"{self.token}: {file_count} files and {folder_count} folders" ""
 
     def add(self, entity: Entity):
-        if self.find(entity.name):
+        if self.find(entity.token):
             raise Exception("Entity already exists!")
 
-        if (entity != self):
-            self.children.append(entity)
-    
-            
-    
-    def remove(self, file_name):
-        child = self.find(file_name)
+        if entity != self:
+            self.children[entity.token] = entity
+            entity.parent = self
 
-        if child: 
-            self.remove(child)
-            return
+    def delete(self, token):
+        entity = self.find(token)
 
-        raise Exception("File not found!")
+        if entity:
+            del self.children[entity.token]
+            entity.parent = None
+        else:
+            raise Exception("Entity not found!")
 
     def get_size(self):
         size = 0
@@ -84,8 +85,67 @@ class Folder(Entity):
         for child in self.children:
             print(child)
 
-    def find(self, name):
-        for child in self.children:
-            if child.name == name:
-                return child
+    def find(self, token):
+        if token in self.children:
+            return self.children[token]
         return None
+
+
+class Manager:
+    def __init__(self):
+        self.root = Folder(token="~")
+        self.cwd = self.root
+        self.open_files = {}
+
+    def create(self, token):
+        file = File(token)
+        file.mode = "w"
+        self.cwd.add(file)
+        return file
+
+    def delete(self, path):
+        entity = self.find(path)
+
+        if entity:
+            entity.parent.delete(entity.token)
+            entity.parent = None
+        else:
+            raise Exception("Entity not found!")
+
+    def mkdir(self, token):
+        folder = Folder(token)
+        self.cwd.add(folder)
+
+    def ls(self):
+        self.cwd.ls()
+
+    def find(self, path):
+        path_array = path.split("/")
+
+        if len(path_array) == 1:
+            return self.cwd.find(path)
+
+        if path_array[0] == "~":
+            entity = self.root
+        elif path_array[0] == "..":
+            entity = self.cwd.parent
+        else:
+            entity = self.cwd
+
+        for index, token in enumerate(path_array[1:]):
+            if token == "~" or token == ".":
+                raise Exception("Invalid path!")
+
+            if token == "" and index == len(path_array) - 2:
+                continue
+
+            if token == "..":
+                entity = entity.parent
+                continue
+
+            entity = entity.find(token)
+
+            if not isinstance(entity, Folder) and token != path_array[-1]:
+                return None
+
+        return entity
