@@ -24,7 +24,7 @@ class File(Entity):
     def __str__(self):
         return f"{self.token}: size: {self.size}"
 
-    def retoken_file(self, token, new_token): 
+    def retoken_file(self, token, new_token):
         file = self.find_file(token)
 
         if file:
@@ -43,7 +43,7 @@ class File(Entity):
 
     def get_size(self):
         return self.size
-    
+
     def __str__(self):
         return f"{self.token}: size: {self.size} Enabled: {self.enabled}"
 
@@ -55,10 +55,12 @@ class Folder(Entity):
 
     def __str__(self):
         file_count = len(
-            list(filter(lambda child: isinstance(child, File), self.children))
+            list(filter(lambda child: isinstance(child, File), self.children.values()))
         )
         folder_count = len(
-            list(filter(lambda child: isinstance(child, Folder), self.children))
+            list(
+                filter(lambda child: isinstance(child, Folder), self.children.values())
+            )
         )
         return f"{self.token}: {file_count} files and {folder_count} folders" ""
 
@@ -81,12 +83,12 @@ class Folder(Entity):
 
     def get_size(self):
         size = 0
-        for child in self.children:
+        for child in self.children.values():
             size += child.get_size()
         return size
 
     def ls(self):
-        for child in self.children:
+        for child in self.children.values():
             print(child)
 
     def find(self, token):
@@ -136,7 +138,7 @@ class Manager:
         else:
             entity = self.cwd
 
-        for index, token in enumerate(path_array[1:]): 
+        for index, token in enumerate(path_array[1:]):
             if token == "~" or token == ".":
                 raise Exception("Invalid path!")
 
@@ -163,30 +165,32 @@ class Manager:
         entity = self.find(path)
 
         if entity:
-            self.cwd = entity 
+            self.cwd = entity
         else:
             raise Exception("Entity not found!")
 
-    def open(self, path, mode): # 
+    def open(self, path, mode):  #
         file = self.find(path)
 
         if file:
             file.mode = mode
-            if (file.mode == 'r'):
-                self.open_files[path] = file # Using path as key / Can be changed to file.token
+            if file.mode == "r":
+                self.open_files[
+                    path
+                ] = file  # Using path as key / Can be changed to file.token
                 print("File:", file.token, "opened for reading.")
-            elif(file.mode == 'w'):
+            elif file.mode == "w":
                 self.open_files[path] = file
                 file.enabled = True
                 print("File:", file.token, "opened for reading.")
 
-            return file # Returning object
+            return file  # Returning object
             # content = file.get_content()
             # return content
 
         else:
             raise Exception("Entity not found!")
-    
+
     def close(self, path):
         file = self.find(path)
         if file:
@@ -196,8 +200,8 @@ class Manager:
             print("File:", file.token, "closed.")
         else:
             raise Exception("Entity not found!")
-    
-    def move(self, source, destination): 
+
+    def move(self, source, destination):
         entity = self.find(source)
         new_entity = self.find(destination)
         if entity and new_entity:
@@ -205,8 +209,8 @@ class Manager:
             new_entity.add(entity)
         else:
             raise Exception("Entity not found!")
-    
-    def write_to_file(self, path, content): 
+
+    def write_to_file(self, path, content):
 
         if path in self.open_files:
             file = self.open_files[path]
@@ -216,12 +220,11 @@ class Manager:
                 raise Exception("Entity not enabled for writing!")
         else:
             raise Exception("Entity not found!")
-    
+
     def read_from_file(self, path):
         if path in self.open_files:
             file = self.open_files[path]
             return file.get_content()
-        
+
         else:
             raise Exception("Entity not found!")
-
