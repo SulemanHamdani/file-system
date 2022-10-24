@@ -281,3 +281,4 @@ class Manager:
 
             # ABCDEF
             #ABEF
+            # ACDBEF
