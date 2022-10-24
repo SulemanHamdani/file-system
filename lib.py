@@ -182,7 +182,7 @@ class Manager:
             elif file.mode == "w":
                 self.open_files[path] = file
                 file.enabled = True
-                print("File:", file.token, "opened for reading.")
+                print("File:", file.token, "opened for writing.")
 
             return file  # Returning object
             # content = file.get_content()
@@ -228,3 +228,51 @@ class Manager:
 
         else:
             raise Exception("Entity not found!")
+
+    def write_to_file_at(self, path, content, offset):
+        if path in self.open_files:
+            file = self.open_files[path]
+            if file.enabled:
+                txt = file.get_content()
+                txt = txt[:offset] + content + txt[offset:]
+                file.update_content(txt)
+                file.update_size()
+            else:
+                raise Exception("Entity not enabled for writing!")
+        else:
+            raise Exception("Entity not found!")
+
+    def read_from_file_at(self, path, offset, size): # When size is defined
+        if path in self.open_files:
+            file = self.open_files[path]
+            txt = file.get_content()
+            return txt[offset:offset + size] 
+
+        else:
+            raise Exception("Entity not found!")
+    
+    def read_from_file_at(self, path, offset): # When size is not defined
+        if path in self.open_files:
+            file = self.open_files[path]
+            txt = file.get_content()
+            return txt[offset:]  
+
+        else:
+            raise Exception("Entity not found!")
+
+    def move_content_in_file(self, path, source, size, destination):
+        if path in self.open_files:
+            file = self.open_files[path]
+            if file.enabled:
+                txt = file.get_content()
+                txt = txt[:source] + txt[source + size:]
+                txt = txt[:destination] + txt[source:source+size] + txt[destination:]
+                file.update_content(txt)
+            else:
+                raise Exception("Entity not enabled for writing!")
+        else:
+            raise Exception("Entity not found!")
+
+
+            # ABCDEF
+            #ABEF
