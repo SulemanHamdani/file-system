@@ -1,0 +1,56 @@
+{
+  "type": "folder",
+  "created_at": "2022-10-25 19:30:53.811493",
+  "last_modified_at": "2022-10-25 19:30:53.811493",
+  "children": {
+    "subaru": {
+      "type": "folder",
+      "created_at": "2022-10-25 19:30:53.811565",
+      "last_modified_at": "2022-10-25 19:30:53.811565",
+      "children": {
+        "sule": {
+          "type": "folder",
+          "created_at": "2022-10-25 19:30:53.811592",
+          "last_modified_at": "2022-10-25 19:30:53.811592",
+          "children": {
+            "ok": {
+              "created_at": "2022-10-25 19:30:53.811599",
+              "last_modified_at": "2022-10-25 19:30:53.811599",
+              "type": "file"
+            }
+          }
+        }
+      }
+    },
+    "natsuki": {
+      "created_at": "2022-10-25 19:30:53.811572",
+      "last_modified_at": "2022-10-25 19:30:53.811572",
+      "type": "file",
+      "chunks": [
+        {
+          "index": 0,
+          "block": 1,
+          "offset": 0,
+          "limit": 5
+        },
+        {
+          "index": 1,
+          "block": 1,
+          "offset": 10,
+          "limit": 5
+        },
+        {
+          "index": 2,
+          "block": 1,
+          "offset": 0,
+          "limit": 5
+        }
+      ]
+    },
+    "yuri": {
+      "created_at": "2022-10-25 19:30:53.811576",
+      "last_modified_at": "2022-10-25 19:30:53.811576",
+      "type": "file"
+    }
+  }
+}

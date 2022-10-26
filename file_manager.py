@@ -1,5 +1,6 @@
 import datetime
 import os
+import json
 
 
 class Entity:
@@ -46,6 +47,14 @@ class File(Entity):
 
     def __str__(self):
         return f"{self.token}: size: {self.size} Enabled: {self.enabled}"
+
+    def get_JSON(self):
+        return {
+            "created_at": self.created_at.__str__(),
+            "last_modified_at": self.last_modified_at.__str__(),
+            "type": "file",
+            "size": self.size,
+        }
 
 
 class Folder(Entity):
@@ -96,8 +105,21 @@ class Folder(Entity):
             return self.children[token]
         return None
 
+    def get_JSON(self):
+        children = {}
 
-class Manager:
+        for child in self.children.values():
+            children[child.token] = child.get_JSON()
+
+        return {
+            "type": "folder",
+            "created_at": self.created_at.__str__(),
+            "last_modified_at": self.last_modified_at.__str__(),
+            "children": children,
+        }
+
+
+class FileManager:
     def __init__(self):
         self.root = Folder(token="~")
         self.cwd = self.root
@@ -164,45 +186,43 @@ class Manager:
 
         entity = self.find(path)
 
-        if entity:
+        if entity and isinstance(entity, Folder):
             self.cwd = entity
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Invalid directory path!")
 
-    def open(self, path, mode): 
+    def open(self, path, mode):
         file = self.find(path)
 
         if file:
-            if file not in self.open_files.values(): 
+            if file not in self.open_files.values():
                 file.mode = mode
                 if file.mode == "r":
-                    self.open_files[path] = file  # Using path as key / Can be changed to file.token
-                    print("File:", file.token, "opened for reading.")
+                    self.open_files[
+                        path
+                    ] = file  # Using path as key / Can be changed to file.token
                 elif file.mode == "w":
                     self.open_files[path] = file
                     file.enabled = True
-                    print("File:", file.token, "opened for writing.")
-                
+
             else:
-                print("File is already opened!")
-            
+                raise Exception("File is already open!")
+
             return file
 
-           
         else:
             raise Exception("Entity not found!")
 
     def close(self, path):
         file = self.find(path)
         if file:
-            if file not in self.open_files.values(): 
+            if file not in self.open_files.values():
                 print("File is not opened!")
-            else:    
+            else:
                 file.mode = None
                 file.enabled = False
                 del self.open_files[path]
                 print("File:", file.token, "closed.")
-
         else:
             raise Exception("Entity not found!")
 
@@ -216,7 +236,6 @@ class Manager:
             raise Exception("Entity not found!")
 
     def write_to_file(self, path, content):
-
         if path in self.open_files:
             file = self.open_files[path]
             if file.enabled:
@@ -247,20 +266,19 @@ class Manager:
         else:
             raise Exception("Entity not found!")
 
-    def read_from_file_at(self, path, offset, size): # When size is defined
+    def read_from_file_at(self, path, offset, size):  # When size is defined
         if path in self.open_files:
             file = self.open_files[path]
             txt = file.get_content()
-            return txt[offset:offset + size] 
-
+            return txt[offset : offset + size]
         else:
             raise Exception("Entity not open!")
-    
-    def read_from_file_at(self, path, offset): # When size is not defined
+
+    def read_from_file_at(self, path, offset):  # When size is not defined
         if path in self.open_files:
             file = self.open_files[path]
             txt = file.get_content()
-            return txt[offset:]  
+            return txt[offset:]
 
         else:
             raise Exception("Entity not open!")
@@ -270,15 +288,16 @@ class Manager:
             file = self.open_files[path]
             if file.enabled:
                 txt = file.get_content()
-                txt = txt[:source] + txt[source + size:]
-                txt = txt[:destination] + txt[source:source+size] + txt[destination:]
+                txt = txt[:source] + txt[source + size :]
+                txt = (
+                    txt[:destination] + txt[source : source + size] + txt[destination:]
+                )
                 file.update_content(txt)
             else:
                 raise Exception("Entity not enabled for writing!")
         else:
             raise Exception("Entity not open!")
 
-
-            # ABCDEF
-            #ABEF
-            # ACDBEF
+    def dump_JSON(self):
+        file = open("memory_map.json", "w")
+        file.write(json.dumps(self.root.get_JSON(), indent=2))
