@@ -1,56 +1,39 @@
 {
   "type": "folder",
-  "created_at": "2022-10-25 19:30:53.811493",
-  "last_modified_at": "2022-10-25 19:30:53.811493",
+  "created_at": "2022-10-26 23:10:21.569223",
+  "last_modified_at": "2022-10-26 23:10:21.569223",
   "children": {
     "subaru": {
       "type": "folder",
-      "created_at": "2022-10-25 19:30:53.811565",
-      "last_modified_at": "2022-10-25 19:30:53.811565",
+      "created_at": "2022-10-26 23:10:21.569223",
+      "last_modified_at": "2022-10-26 23:10:21.569223",
       "children": {
         "sule": {
           "type": "folder",
-          "created_at": "2022-10-25 19:30:53.811592",
-          "last_modified_at": "2022-10-25 19:30:53.811592",
+          "created_at": "2022-10-26 23:10:21.569223",
+          "last_modified_at": "2022-10-26 23:10:21.569223",
           "children": {
             "ok": {
-              "created_at": "2022-10-25 19:30:53.811599",
-              "last_modified_at": "2022-10-25 19:30:53.811599",
-              "type": "file"
+              "created_at": "2022-10-26 23:10:21.569223",
+              "last_modified_at": "2022-10-26 23:10:21.569223",
+              "type": "file",
+              "size": 0
             }
           }
         }
       }
     },
     "natsuki": {
-      "created_at": "2022-10-25 19:30:53.811572",
-      "last_modified_at": "2022-10-25 19:30:53.811572",
+      "created_at": "2022-10-26 23:10:21.569223",
+      "last_modified_at": "2022-10-26 23:10:21.569223",
       "type": "file",
-      "chunks": [
-        {
-          "index": 0,
-          "block": 1,
-          "offset": 0,
-          "limit": 5
-        },
-        {
-          "index": 1,
-          "block": 1,
-          "offset": 10,
-          "limit": 5
-        },
-        {
-          "index": 2,
-          "block": 1,
-          "offset": 0,
-          "limit": 5
-        }
-      ]
+      "size": 0
     },
     "yuri": {
-      "created_at": "2022-10-25 19:30:53.811576",
-      "last_modified_at": "2022-10-25 19:30:53.811576",
-      "type": "file"
+      "created_at": "2022-10-26 23:10:21.569223",
+      "last_modified_at": "2022-10-26 23:10:21.569223",
+      "type": "file",
+      "size": 0
     }
   }
 }

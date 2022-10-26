@@ -1,6 +1,9 @@
 import datetime
 import os
 import json
+from memory_manager import MemoryManager
+
+memManager = MemoryManager()
 
 
 class Entity:
@@ -20,7 +23,8 @@ class File(Entity):
         Entity.__init__(self, token)
         self.size = size  # in bytes
         self.mode = None  # 'r' | 'w'
-        self.enabled = False
+        self.chunks = []
+        self.content = ""
 
     def __str__(self):
         return f"{self.token}: size: {self.size}"
@@ -32,11 +36,12 @@ class File(Entity):
             file.token = new_token
             return
 
-    def update_content(self, content):
-        self.content = content
-        self.update_size()
+    def update_content(self):
+        memManager.deallocate(self.chunks)
+        self.save_to_mem()
 
     def get_content(self):
+        self.content = self.load_from_mem()
         return self.content
 
     def update_size(self):
@@ -47,6 +52,79 @@ class File(Entity):
 
     def __str__(self):
         return f"{self.token}: size: {self.size} Enabled: {self.enabled}"
+    
+    def write_to_file(self, content):
+
+        if self.mode == 'w':
+            self.content = self.get_content() + content
+            self.size += len(self.content)
+            self.update_content() #Saving to memory
+            self.last_modified_at = datetime.datetime.now()
+                       
+        else:
+            raise Exception("Entity not enabled for writing!")
+       
+
+    def read_from_file(self):
+            return self.get_content()
+
+    def write_to_file_at(self, content, offset):
+        if self.mode == 'w':
+            txt = self.get_content()
+            txt = txt[:offset] + content + txt[offset:]
+            self.content = txt
+            self.size += len(content)
+            self.update_content()
+            
+        else:
+            raise Exception("Entity not enabled for writing!")
+
+    def read_from_file_at(self, offset, size): # When size is defined
+        if self.mode == 'r' or self.mode == 'w':
+            txt = self.get_content()
+            return txt[offset:offset + size] 
+
+        else:
+            raise Exception("Entity not open!")
+    
+    def read_from_file_at(self, offset): # When size is not defined
+        if self.mode == 'r' or self.mode == 'w':
+            txt = self.get_content()
+            return txt[offset:]  
+
+        else:
+            raise Exception("Entity not open!")
+    
+    def move_content_in_file(self, source, size, destination):
+        if self.mode == 'w':
+            txt = self.get_content()
+            txt = txt[:source] + txt[source + size:]
+            txt = txt[:destination] + txt[source:source+size] + txt[destination:]
+            self.content = txt
+            self.update_size
+
+        else:
+            raise Exception("Entity not enabled for writing!")
+    
+    def chunkify(self, start, size):
+        txt = self.content[start:start + size]
+        return txt
+    
+    def save_to_mem(self):
+        start = 0
+        mem = memManager.allocate(self.size)
+        for chunk in mem:
+            chunk_size = chunk.limit - chunk.offset
+            chunk.content = self.chunkify(start, chunk_size)
+            memManager.write_content(chunk, chunk.content)
+            start += chunk_size
+            self.chunks.append(chunk)
+
+    def load_from_mem(self):
+        txt = ""
+        for chunk in self.chunks:
+            txt += memManager.get_content(chunk)
+            return txt
 
     def get_JSON(self):
         return {
@@ -123,11 +201,11 @@ class FileManager:
     def __init__(self):
         self.root = Folder(token="~")
         self.cwd = self.root
-        self.open_files = {}
 
     def create(self, token):
         file = File(token)
         file.mode = "w"
+        file.created_at = datetime.datetime.now()
         self.cwd.add(file)
         return file
 
@@ -191,38 +269,34 @@ class FileManager:
         else:
             raise Exception("Invalid directory path!")
 
-    def open(self, path, mode):
+    def open(self, path, mode): 
         file = self.find(path)
 
         if file:
-            if file not in self.open_files.values():
+            if file.mode != None: 
                 file.mode = mode
                 if file.mode == "r":
-                    self.open_files[
-                        path
-                    ] = file  # Using path as key / Can be changed to file.token
+                    print("File:", file.token, "opened for reading.")
                 elif file.mode == "w":
-                    self.open_files[path] = file
-                    file.enabled = True
-
+                    print("File:", file.token, "opened for writing.")
+                
             else:
-                raise Exception("File is already open!")
-
-            return file
-
+                print("File is already opened!")
+           
         else:
             raise Exception("Entity not found!")
+        
+        return file
 
     def close(self, path):
         file = self.find(path)
         if file:
-            if file not in self.open_files.values():
+            if file.mode == None: 
                 print("File is not opened!")
-            else:
+            else:    
                 file.mode = None
-                file.enabled = False
-                del self.open_files[path]
                 print("File:", file.token, "closed.")
+
         else:
             raise Exception("Entity not found!")
 
@@ -234,69 +308,6 @@ class FileManager:
             new_entity.add(entity)
         else:
             raise Exception("Entity not found!")
-
-    def write_to_file(self, path, content):
-        if path in self.open_files:
-            file = self.open_files[path]
-            if file.enabled:
-                file.update_content(content)
-            else:
-                raise Exception("Entity not enabled for writing!")
-        else:
-            raise Exception("Entity not opended!")
-
-    def read_from_file(self, path):
-        if path in self.open_files:
-            file = self.open_files[path]
-            return file.get_content()
-
-        else:
-            raise Exception("Entity not open!")
-
-    def write_to_file_at(self, path, content, offset):
-        if path in self.open_files:
-            file = self.open_files[path]
-            if file.enabled:
-                txt = file.get_content()
-                txt = txt[:offset] + content + txt[offset:]
-                file.update_content(txt)
-                file.update_size()
-            else:
-                raise Exception("Entity not enabled for writing!")
-        else:
-            raise Exception("Entity not found!")
-
-    def read_from_file_at(self, path, offset, size):  # When size is defined
-        if path in self.open_files:
-            file = self.open_files[path]
-            txt = file.get_content()
-            return txt[offset : offset + size]
-        else:
-            raise Exception("Entity not open!")
-
-    def read_from_file_at(self, path, offset):  # When size is not defined
-        if path in self.open_files:
-            file = self.open_files[path]
-            txt = file.get_content()
-            return txt[offset:]
-
-        else:
-            raise Exception("Entity not open!")
-
-    def move_content_in_file(self, path, source, size, destination):
-        if path in self.open_files:
-            file = self.open_files[path]
-            if file.enabled:
-                txt = file.get_content()
-                txt = txt[:source] + txt[source + size :]
-                txt = (
-                    txt[:destination] + txt[source : source + size] + txt[destination:]
-                )
-                file.update_content(txt)
-            else:
-                raise Exception("Entity not enabled for writing!")
-        else:
-            raise Exception("Entity not open!")
 
     def dump_JSON(self):
         file = open("memory_map.json", "w")
