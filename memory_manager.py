@@ -57,7 +57,7 @@ class MemoryManager:
                         remaining_size -= free_space
 
                     if remaining_size == 0:
-                        self.dump_JSON()
+                        self.save_to_drive()
                         return memory
 
         raise Exception("Not enough space!")
@@ -73,7 +73,7 @@ class MemoryManager:
             )
             block["is_full"] = False
 
-        self.dump_JSON()
+        self.save_to_drive()
 
     def format_drive(self):
         self.blocks = {}
@@ -90,9 +90,9 @@ class MemoryManager:
                 ],
             }
 
-        self.dump_JSON()
+        self.save_to_drive()
 
-    def dump_JSON(self):
+    def save_to_drive(self):
         mem_map = {
             "block_size": self.block_size,
             "num_blocks": self.num_blocks,
@@ -103,11 +103,15 @@ class MemoryManager:
         drive.write(json.dumps(mem_map, indent=2))
 
     def get_content(self, memory_chunk):
-        return self.blocks[block_num]["content"][
+        return self.blocks[memory_chunk.block_num]["content"][
             memory_chunk.offset : memory_chunk.limit
         ]
 
     def write_content(self, memory_chunk, content):
-        self.blocks[block_num]["content"][
-            memory_chunk.offset : memory_chunk.limit
-        ] = content
+        original_content = self.blocks[memory_chunk.block_num]["content"]
+        self.blocks[memory_chunk.block_num]["content"] = (
+            original_content[: memory_chunk.offset]
+            + content
+            + original_content[memory_chunk.limit :]
+        )
+        self.save_to_drive()

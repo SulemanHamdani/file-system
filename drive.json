@@ -3,21 +3,35 @@
   "num_blocks": 12,
   "blocks": {
     "1": {
-      "content": "",
-      "is_full": true,
-      "free_chunks": []
+      "content": "Hello, world!Hello, world! - NatuskiHello",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 41,
+          "limit": 512
+        },
+        {
+          "offset": 0,
+          "limit": 13
+        }
+      ]
     },
     "2": {
       "content": "",
-      "is_full": true,
-      "free_chunks": []
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 512
+        }
+      ]
     },
     "3": {
       "content": "",
       "is_full": false,
       "free_chunks": [
         {
-          "offset": 481,
+          "offset": 0,
           "limit": 512
         }
       ]

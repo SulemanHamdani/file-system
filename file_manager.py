@@ -4,6 +4,7 @@ import json
 from memory_manager import MemoryManager
 
 memManager = MemoryManager()
+memManager.format_drive()
 
 
 class Entity:
@@ -38,8 +39,9 @@ class File(Entity):
 
     def save(self):
         memManager.deallocate(self.chunks)
-        self.save_to_mem()
         self.last_modified_at = datetime.datetime.now()
+        self.save_to_mem()
+        memManager.save_to_drive()
 
     def get_content(self):
         self.content = self.load_from_mem()
@@ -56,9 +58,9 @@ class File(Entity):
 
     def write_to_file(self, content):
         if self.mode == "w":
-            self.content = self.get_content() + content
+            self.content = content
             self.size = len(self.content)
-            self.save()  # Saving to memory
+            self.save()
         else:
             raise Exception("Entity not enabled for writing!")
 
@@ -71,7 +73,7 @@ class File(Entity):
             txt = txt[:offset] + content + txt[offset:]
             self.content = txt
             self.size += len(content)
-            self.update_content()
+            self.save()
 
         else:
             raise Exception("Entity not enabled for writing!")
@@ -104,12 +106,12 @@ class File(Entity):
             raise Exception("Entity not enabled for writing!")
 
     def chunkify(self, start, size):
-        txt = self.content[start : start + size]
-        return txt
+        return self.content[start : start + size]
 
     def save_to_mem(self):
         start = 0
         mem = memManager.allocate(self.size)
+
         for chunk in mem:
             chunk_size = chunk.limit - chunk.offset
             chunk.content = self.chunkify(start, chunk_size)
@@ -271,22 +273,21 @@ class FileManager:
     def open(self, path, mode):
         file = self.find(path)
 
-        if file:
+        if not file or isinstance(file, Folder):
+            raise Exception("Invalid file path!")
+
+        if file.mode == None:
             file.mode = mode
         else:
-            raise Exception("Entity not found!")
+            raise Exception("File is already open!")
 
         return file
 
     def close(self, path):
         file = self.find(path)
-        if file:
-            if file.mode == None:
-                print("File is not opened!")
-            else:
-                file.mode = None
-                print("File:", file.token, "closed.")
 
+        if file:
+            file.mode = None
         else:
             raise Exception("Entity not found!")
 
