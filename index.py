@@ -1,5 +1,4 @@
 from file_manager import FileManager, File
-from memory_manager import MemoryManager
 
 
 manager = FileManager()
@@ -8,10 +7,13 @@ manager.create("natsumi")
 natsuki = manager.open("~/natsuki", "w")
 natsuki.write_to_file("Hello, world!")
 natsuki.write_to_file("Hello, world! - Natuski")
-ok = manager.open("~/subaru/sule/ok", "w")
-ok.write_to_file("Hello")
-print(natsuki.get_content())
-print(ok.get_content())
+natsuki.write_to_file_at("-hahah ", len("Hello, world! "))
+print(natsuki.read_from_file())
+print(natsuki.read_from_file_at(len("Hello, world! ")))
+natsuki.truncate(len("Hello, world! "))
+print(natsuki.read_from_file())
+
+# ok.write_to_file("Hello")
 # # manager.create("sayori")
 # mem_manager = MemoryManager()
 # mem_manager.format_drive()

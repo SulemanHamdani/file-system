@@ -6,7 +6,6 @@ from memory_manager import MemoryManager
 memManager = MemoryManager()
 memManager.format_drive()
 
-
 class Entity:
     def __init__(self, token, parent=None):
         self.token = token
@@ -39,12 +38,17 @@ class File(Entity):
 
     def save(self):
         memManager.deallocate(self.chunks)
+        self.chunks = []
         self.last_modified_at = datetime.datetime.now()
         self.save_to_mem()
         memManager.save_to_drive()
 
     def get_content(self):
-        self.content = self.load_from_mem()
+        self.content = ''
+
+        for chunk in self.chunks:
+            self.content += memManager.get_content(chunk)
+            
         return self.content
 
     def update_size(self):
@@ -70,11 +74,9 @@ class File(Entity):
     def write_to_file_at(self, content, offset):
         if self.mode == "w":
             txt = self.get_content()
-            txt = txt[:offset] + content + txt[offset:]
-            self.content = txt
-            self.size += len(content)
+            self.content = txt[:offset] + content + txt[offset:]
+            self.size = len(self.content)
             self.save()
-
         else:
             raise Exception("Entity not enabled for writing!")
 
@@ -109,23 +111,22 @@ class File(Entity):
         return self.content[start : start + size]
 
     def save_to_mem(self):
-        start = 0
         mem = memManager.allocate(self.size)
+        start = 0
 
         for chunk in mem:
             chunk_size = chunk.limit - chunk.offset
-            chunk.content = self.chunkify(start, chunk_size)
-            memManager.write_content(chunk, chunk.content)
-            start += chunk_size
+            content = self.chunkify(start, chunk_size)
+            memManager.write_content(chunk, content)
             self.chunks.append(chunk)
-
-    def load_from_mem(self):
-        txt = ""
-
-        for chunk in self.chunks:
-            txt += memManager.get_content(chunk)
-
-        return txt
+            start += chunk_size
+    
+    def truncate(self, size):
+        if self.mode == "w":
+            self.content = self.content[:size]
+            self.save()
+        else:
+            raise Exception("Entity not enabled for writing!")
 
     def get_JSON(self):
         return {

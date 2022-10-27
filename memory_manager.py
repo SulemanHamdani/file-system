@@ -110,8 +110,8 @@ class MemoryManager:
     def write_content(self, memory_chunk, content):
         original_content = self.blocks[memory_chunk.block_num]["content"]
         self.blocks[memory_chunk.block_num]["content"] = (
-            original_content[: memory_chunk.offset]
+            original_content[:memory_chunk.offset]
             + content
-            + original_content[memory_chunk.limit :]
+            + original_content[memory_chunk.limit:]
         )
         self.save_to_drive()
