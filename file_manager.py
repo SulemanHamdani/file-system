@@ -36,9 +36,10 @@ class File(Entity):
             file.token = new_token
             return
 
-    def update_content(self):
+    def save(self):
         memManager.deallocate(self.chunks)
         self.save_to_mem()
+        self.last_modified_at = datetime.datetime.now()
 
     def get_content(self):
         self.content = self.load_from_mem()
@@ -52,64 +53,60 @@ class File(Entity):
 
     def __str__(self):
         return f"{self.token}: size: {self.size} Enabled: {self.enabled}"
-    
-    def write_to_file(self, content):
 
-        if self.mode == 'w':
+    def write_to_file(self, content):
+        if self.mode == "w":
             self.content = self.get_content() + content
-            self.size += len(self.content)
-            self.update_content() #Saving to memory
-            self.last_modified_at = datetime.datetime.now()
-                       
+            self.size = len(self.content)
+            self.save()  # Saving to memory
         else:
             raise Exception("Entity not enabled for writing!")
-       
 
     def read_from_file(self):
-            return self.get_content()
+        return self.get_content()
 
     def write_to_file_at(self, content, offset):
-        if self.mode == 'w':
+        if self.mode == "w":
             txt = self.get_content()
             txt = txt[:offset] + content + txt[offset:]
             self.content = txt
             self.size += len(content)
             self.update_content()
-            
+
         else:
             raise Exception("Entity not enabled for writing!")
 
-    def read_from_file_at(self, offset, size): # When size is defined
-        if self.mode == 'r' or self.mode == 'w':
+    def read_from_file_at(self, offset, size):  # When size is defined
+        if self.mode == "r" or self.mode == "w":
             txt = self.get_content()
-            return txt[offset:offset + size] 
+            return txt[offset : offset + size]
 
         else:
             raise Exception("Entity not open!")
-    
-    def read_from_file_at(self, offset): # When size is not defined
-        if self.mode == 'r' or self.mode == 'w':
+
+    def read_from_file_at(self, offset):  # When size is not defined
+        if self.mode == "r" or self.mode == "w":
             txt = self.get_content()
-            return txt[offset:]  
+            return txt[offset:]
 
         else:
             raise Exception("Entity not open!")
-    
+
     def move_content_in_file(self, source, size, destination):
-        if self.mode == 'w':
+        if self.mode == "w":
             txt = self.get_content()
-            txt = txt[:source] + txt[source + size:]
-            txt = txt[:destination] + txt[source:source+size] + txt[destination:]
+            txt = txt[:source] + txt[source + size :]
+            txt = txt[:destination] + txt[source : source + size] + txt[destination:]
             self.content = txt
             self.update_size
 
         else:
             raise Exception("Entity not enabled for writing!")
-    
+
     def chunkify(self, start, size):
-        txt = self.content[start:start + size]
+        txt = self.content[start : start + size]
         return txt
-    
+
     def save_to_mem(self):
         start = 0
         mem = memManager.allocate(self.size)
@@ -122,9 +119,11 @@ class File(Entity):
 
     def load_from_mem(self):
         txt = ""
+
         for chunk in self.chunks:
             txt += memManager.get_content(chunk)
-            return txt
+
+        return txt
 
     def get_JSON(self):
         return {
@@ -201,6 +200,7 @@ class FileManager:
     def __init__(self):
         self.root = Folder(token="~")
         self.cwd = self.root
+        self.boot_up()
 
     def create(self, token):
         file = File(token)
@@ -257,7 +257,6 @@ class FileManager:
         return entity
 
     def chDir(self, path):
-
         if path == "~":
             self.cwd = self.root
             return
@@ -269,31 +268,22 @@ class FileManager:
         else:
             raise Exception("Invalid directory path!")
 
-    def open(self, path, mode): 
+    def open(self, path, mode):
         file = self.find(path)
 
         if file:
-            if file.mode != None: 
-                file.mode = mode
-                if file.mode == "r":
-                    print("File:", file.token, "opened for reading.")
-                elif file.mode == "w":
-                    print("File:", file.token, "opened for writing.")
-                
-            else:
-                print("File is already opened!")
-           
+            file.mode = mode
         else:
             raise Exception("Entity not found!")
-        
+
         return file
 
     def close(self, path):
         file = self.find(path)
         if file:
-            if file.mode == None: 
+            if file.mode == None:
                 print("File is not opened!")
-            else:    
+            else:
                 file.mode = None
                 print("File:", file.token, "closed.")
 
@@ -308,6 +298,45 @@ class FileManager:
             new_entity.add(entity)
         else:
             raise Exception("Entity not found!")
+
+    def boot_up(self):
+        data = json.load(open("memory_map.json"))
+        self.load_children(self.root, data["children"])
+
+    def load_children(self, folder, children):
+        for child in children:
+            if children[child]["type"] == "folder":
+
+                dir = Folder(token=child)
+                folder.add(dir)
+
+                dir.created_at = datetime.datetime.strptime(
+                    children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f"
+                )
+
+                dir.last_modified_at = datetime.datetime.strptime(
+                    children[child]["last_modified_at"], "%Y-%m-%d %H:%M:%S.%f"
+                )
+
+                self.load_children(
+                    dir,
+                    children[child]["children"],
+                )
+            else:
+                file = File(
+                    token=child,
+                    size=children[child]["size"],
+                )
+
+                file.created_at = datetime.datetime.strptime(
+                    children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f"
+                )
+
+                file.last_modified_at = datetime.datetime.strptime(
+                    children[child]["last_modified_at"], "%Y-%m-%d %H:%M:%S.%f"
+                )
+
+                folder.add(file)
 
     def dump_JSON(self):
         file = open("memory_map.json", "w")
