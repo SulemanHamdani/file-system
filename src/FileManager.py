@@ -29,6 +29,10 @@ class FileManager:
         if entity:
             entity.parent.delete(entity.token)
             entity.parent = None
+
+            if entity.chunks:
+                self.memory_manager.deallocate(entity.chunks)
+
             self.save()
         else:
             raise Exception("Entity not found!")
@@ -166,3 +170,4 @@ class FileManager:
         self.memory_manager.format_drive()
         self.root = DirectoryNode(token="~")
         self.cwd = self.root
+        self.save()

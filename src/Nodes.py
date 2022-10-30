@@ -67,21 +67,31 @@ class FileNode(Entity):
     def move_content(self, source_index, size, destination_index):
         if self.mode == "w":
             txt = self.get_content()
-            txt = txt[:source_index] + txt[source_index + size :]
-            txt = (
-                txt[:destination_index]
-                + txt[source_index : source_index + size]
-                + txt[destination_index:]
+
+            if source_index + size > len(txt):
+                raise Exception("Invalid source index!")
+
+            if destination_index + size > len(txt):
+                raise Exception("Invalid destination index!")
+
+            if source_index > destination_index:
+                source_index, destination_index = (destination_index, destination_index)
+
+            self.content = (
+                txt[:source_index]
+                + txt[destination_index : destination_index + size]
+                + txt[source_index:destination_index]
+                + txt[destination_index + size :]
             )
-            self.content = txt
-            self.update_size
+
+            self.save()
 
         else:
             raise Exception("File not enabled for writing!")
 
     def truncate(self, max_size):
         if self.mode == "w":
-            self.content = self.content[:max_size]
+            self.content = self.get_content()[:max_size]
             self.save()
         else:
             raise Exception("File not enabled for writing!")
@@ -95,7 +105,7 @@ class FileNode(Entity):
         self.file_manager.save()
 
     def __str__(self):
-        return f"{self.token}: size: {self.size} Enabled: {self.enabled}"
+        return self.token
 
     def get_JSON(self):
         return {
@@ -113,22 +123,7 @@ class DirectoryNode(Entity):
         self.children = {}
 
     def __str__(self):
-        file_count = len(
-            list(
-                filter(
-                    lambda child: isinstance(child, FileNode), self.children.values()
-                )
-            )
-        )
-        folder_count = len(
-            list(
-                filter(
-                    lambda child: isinstance(child, DirectoryNode),
-                    self.children.values(),
-                )
-            )
-        )
-        return f"{self.token}: {file_count} files and {folder_count} folders" ""
+        return f"{self.token}"
 
     def add(self, entity: Entity):
         if self.find(entity.token):

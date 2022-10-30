@@ -1,7 +1,7 @@
 from FileManager import FileManager
 
-
 manager = FileManager()
-natsuki = manager.open("~/natsuki", "w")
-
-print(natsuki.read())
+test = manager.open("test.txt", "w")
+print("Before Truncate: ", test.read())
+test.truncate(5)
+print("After Truncate: ", test.read())

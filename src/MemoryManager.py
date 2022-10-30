@@ -72,7 +72,7 @@ class MemoryManager:
 
     def deallocate(self, memory):
         for chunk in memory:
-            block = self.blocks[chunk.block_num]
+            block = self.blocks[str(chunk.block_num)]
             block["free_chunks"].append(
                 {
                     "offset": chunk.offset,
@@ -87,7 +87,7 @@ class MemoryManager:
         self.blocks = {}
 
         for num_block in range(1, self.num_blocks + 1):
-            self.blocks[num_block] = {
+            self.blocks[str(num_block)] = {
                 "content": "",
                 "is_full": False,
                 "free_chunks": [
@@ -112,7 +112,7 @@ class MemoryManager:
         drive.close()
 
     def get_content(self, memory_chunk):
-        return self.blocks[memory_chunk.block_num]["content"][
+        return self.blocks[str(memory_chunk.block_num)]["content"][
             memory_chunk.offset : memory_chunk.limit
         ]
 
