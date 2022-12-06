@@ -1,26 +1,14 @@
 {
-  "block_size": 512,
-  "num_blocks": 12,
+  "block_size": 20,
+  "num_blocks": 20,
   "blocks": {
     "1": {
-      "content": "Hello, world!Hello, world! - NatuskiHello, world! -hahah - NatuskiHello, world! ",
+      "content": "",
       "is_full": false,
       "free_chunks": [
         {
-          "offset": 96,
-          "limit": 512
-        },
-        {
           "offset": 0,
-          "limit": 13
-        },
-        {
-          "offset": 13,
-          "limit": 36
-        },
-        {
-          "offset": 36,
-          "limit": 66
+          "limit": 20
         }
       ]
     },
@@ -30,7 +18,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -40,7 +28,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -50,7 +38,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -60,7 +48,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -70,7 +58,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -80,7 +68,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -90,7 +78,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -100,7 +88,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -110,7 +98,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -120,7 +108,7 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
         }
       ]
     },
@@ -130,7 +118,87 @@
       "free_chunks": [
         {
           "offset": 0,
-          "limit": 512
+          "limit": 20
+        }
+      ]
+    },
+    "13": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "14": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "15": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "16": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "17": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "18": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "19": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
+        }
+      ]
+    },
+    "20": {
+      "content": "",
+      "is_full": false,
+      "free_chunks": [
+        {
+          "offset": 0,
+          "limit": 20
         }
       ]
     }

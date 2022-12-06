@@ -18,12 +18,13 @@ class Memory:
 
 class MemoryManager:
     def __init__(self):
-        file = open(file="../drive.json", mode="r")
+        file = open(file="drive.json", mode="r")
         drive = json.load(file)
         file.close()
 
         self.num_blocks = drive["num_blocks"]
         self.block_size = drive["block_size"]
+        self.format_drive()
         self.blocks = drive["blocks"]
 
     def allocate(self, size):
@@ -107,7 +108,7 @@ class MemoryManager:
             "blocks": self.blocks,
         }
 
-        drive = open(file="../drive.json", mode="w")
+        drive = open(file="drive.json", mode="w")
         drive.write(json.dumps(mem_drive, indent=2))
         drive.close()
 

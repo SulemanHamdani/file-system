@@ -10,7 +10,7 @@ class FileManager:
         self.cwd = self.root
         self.memory_manager = MemoryManager()
 
-        file = open("../memory_map.json", "r")
+        file = open("memory_map.json", "r")
         data = json.load(file)
         self.load_children(self.root, data["children"])
         file.close()
@@ -162,7 +162,7 @@ class FileManager:
                 folder.add(file)
 
     def save(self):
-        file = open("../memory_map.json", "w")
+        file = open("memory_map.json", "w")
         file.write(json.dumps(self.root.get_JSON(), indent=2))
         file.close()
 
@@ -171,3 +171,20 @@ class FileManager:
         self.root = DirectoryNode(token="~")
         self.cwd = self.root
         self.save()
+
+    # function that returns a file when given a name    
+    def get_file(self, name):
+        file = self.find(name)
+        if not file or isinstance(file, DirectoryNode):
+            raise Exception("Invalid file path!")
+        
+        return file
+
+    # function that returns a directory when given a name
+    def get_dir(self, name):
+        dir = self.find(name)
+        if not dir or isinstance(dir, FileNode):
+            raise Exception("Invalid directory path!")
+        
+        return dir
+
