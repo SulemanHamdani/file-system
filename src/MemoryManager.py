@@ -24,7 +24,6 @@ class MemoryManager:
 
         self.num_blocks = drive["num_blocks"]
         self.block_size = drive["block_size"]
-        self.format_drive()
         self.blocks = drive["blocks"]
 
     def allocate(self, size):

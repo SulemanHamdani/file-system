@@ -44,6 +44,9 @@ class FileNode(Entity):
         if self.mode != "w":
             raise Exception("File not enabled for writing!")
 
+        if offset > self.size:
+            raise Exception("Invalid offset!")
+            
         txt = self.get_content()
         self.content = txt[:offset] + content + txt[offset:]
         self.save()
@@ -56,13 +59,13 @@ class FileNode(Entity):
         self.save()
 
     def read(self, offset=0, size=None):
-        if size is None:
+        if size <= 0 or size == None:
             size = self.size
 
-        if self.mode != None:
-            return self.get_content()[offset : offset + size]
+        if self.mode == None:
+            raise Exception("File not open!")
 
-        raise Exception("File not open!")
+        return self.get_content()[offset : min(offset + size, self.size)]
 
     def move_content(self, source_index, size, destination_index):
         if self.mode == "w":
@@ -105,7 +108,7 @@ class FileNode(Entity):
         self.file_manager.save()
 
     def __str__(self):
-        return self.token
+        return f"name: {self.token} | type: file | created_at: {self.created_at} | last_modified_at: {self.last_modified_at}"
 
     def get_JSON(self):
         return {
@@ -123,7 +126,7 @@ class DirectoryNode(Entity):
         self.children = {}
 
     def __str__(self):
-        return f"{self.token}"
+        return f"name: {self.token} | type: folder | created_at: {self.created_at} | last_modified_at: {self.last_modified_at}"
 
     def add(self, entity: Entity):
         if self.find(entity.token):
@@ -138,7 +141,6 @@ class DirectoryNode(Entity):
 
         if entity:
             del self.children[entity.token]
-            entity.parent = None
         else:
             raise Exception("Entity not found!")
 

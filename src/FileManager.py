@@ -17,25 +17,22 @@ class FileManager:
 
     def create_file(self, token):
         file = FileNode(token, self.memory_manager, self)
-        file.mode = "w"
         file.created_at = datetime.datetime.now()
         self.cwd.add(file)
         self.save()
-        return file
 
-    def delete_file(self, path):
+    def delete(self, path):
         entity = self.find(path)
 
         if entity:
             entity.parent.delete(entity.token)
             entity.parent = None
-
-            if entity.chunks:
-                self.memory_manager.deallocate(entity.chunks)
-
             self.save()
+
+            if hasattr(entity, "chunks") and entity.chunks:
+                self.memory_manager.deallocate(entity.chunks)
         else:
-            raise Exception("Entity not found!")
+            raise Exception("Invalid Path!")
 
     def mkdir(self, token):
         folder = DirectoryNode(token)
@@ -71,7 +68,7 @@ class FileManager:
         if not file or isinstance(file, DirectoryNode):
             raise Exception("Invalid file path!")
 
-        if file.mode == None:
+        if file.type == "file" and file.mode == None:
             file.mode = mode
         else:
             raise Exception("FileNode is already open!")
@@ -81,10 +78,13 @@ class FileManager:
     def close(self, path):
         file = self.find(path)
 
+        if not file or isinstance(file, DirectoryNode):
+            raise Exception("Invalid file path!")
+
         if file:
             file.mode = None
         else:
-            raise Exception("Entity not found!")
+            raise Exception("File not found!")
 
     def ls(self):
         self.cwd.ls()
@@ -172,19 +172,6 @@ class FileManager:
         self.cwd = self.root
         self.save()
 
-    # function that returns a file when given a name    
-    def get_file(self, name):
-        file = self.find(name)
-        if not file or isinstance(file, DirectoryNode):
-            raise Exception("Invalid file path!")
-        
-        return file
-
-    # function that returns a directory when given a name
-    def get_dir(self, name):
-        dir = self.find(name)
-        if not dir or isinstance(dir, FileNode):
-            raise Exception("Invalid directory path!")
-        
-        return dir
-
+    def memory_map(self):
+        print("#### Memory Map ####")
+        print(json.dumps(self.root.get_JSON(), indent=2))
