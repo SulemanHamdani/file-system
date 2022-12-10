@@ -1,172 +1,151 @@
 from FileManager import FileManager
 from Nodes import DirectoryNode
+import threading
+import sys
 
-def load_menu():
-    # print the menu
-    print("1. Create a new file")
-    print("2. Open a file with a mode")
-    print("3. Close a file")
-    print("4. Delete a file")
-    print("5. Write to a file")
-    print("6. Write to a file at")
-    print("7. Read a file or read from a specific index")
-    print("8. Move contents of a file within the file")
-    print("9. Truncate the size of a file")
-    print("10. Make a directory")
-    print("11. Delete a directory")
-    print("12. Change directory")
-    print("13. List the children of the CWD")
-    print("14. Display the memory map")
-    print("15. Format drive")
-    print("16. Exit")
+# Make a validate arguments function
+def parse_arguments(args, expected_args):
+    new_args = []
 
+    if len(args) != len(expected_args):
+        raise Exception("Invalid Arguments")
 
+    for i in range(len(args)):
+        if expected_args[i] == "int":
+            new_args.append(int(args[i]))
+        elif expected_args[i] == "str":
+            new_args.append(str(args[i]))
+        else:
+            raise Exception("Invalid Arguments")
+
+    return new_args
+
+def show_format():
+    print ("""
+        create <fname> 
+        delete <fname>
+        mkDir <dirName>
+        chDir <dirName>
+        move <source_fname, target_fname>
+        open <fName,mode>
+        close<Fname>
+        write_to_file <filename>, text
+        write_to_file <filename>,text, startLocation
+        read_from_file <filename,start,size
+        fileObj.Truncate_file maxSize
+        show_memory_map
+    """)
+
+def parse_command(command):
+    # split on spaces and commas
+    command = command.replace(",", " ")
+    command = command.split(" ")
+    # remove empty strings
+    command = list(filter(lambda x: x != "", command))
+    # return the command and the arguments
+    return (command[0], command[1:])
+
+def get_file(file_manager, name):
+    file = file_manager.find(name)
+
+    if not file or isinstance(file, DirectoryNode):
+        raise Exception("Invalid file path!")
+
+    return file
+
+def execute_command(command, file_manager):
+    command, args = parse_command(command)
+
+    try:
+        if len(args) == 0:
+            if command == "show_memory_map":
+                return file_manager.memory_map()
+            elif command == "format":
+                file_manager.format()
+                return "Memory Formatted"
+            else:
+                raise Exception("Invalid Command")
+        elif len(args) == 1:
+            if command == "create":
+                file_manager.create_file(args[0])
+                return "File Created!"
+            elif command == "delete":
+                file_manager.delete(args[0])
+                return 'File Closed'
+            elif command == "mkDir":
+                file_manager.mkdir(args[0])
+                return "Directory created"
+
+            elif command == "chDir":
+                file_manager.chDir(args[0])
+                return "CWD is now: " + args[0]
+            elif command == "close":
+                file_manager.close(args[0])
+                return "File Closed!"
+            elif command == "read_from_file":
+                file = get_file(file_manager, args[0])
+                return file.read()
+            else:
+                raise Exception("Invalid Command")
+        elif len(args) == 2:
+            if command == 'open':
+                if (args[1] != 'r' and args[1] != 'w'):
+                    raise Exception("Invalid Mode")
+                file_manager.open(args[0], args[1])
+                return 'File Opened!'
+            elif command == "move":
+                file_manager.move(args[0], args[1])
+                return 'File Moved!'
+            elif command == "write_to_file":
+                file = get_file(file_manager, args[0])
+                file.write(args[1])
+                return 'Content written!'
+            elif command == "read_from_file":
+                file = get_file(file_manager, args[0])
+                args = parse_arguments(args, ["str", "int"])
+                return file.read(args[1])
+            elif command == "truncate":
+                args = parse_arguments(args, ["str", "int"])
+                file = get_file(file_manager, args[0])
+                file.truncate(args[1])
+                return 'File truncated!'
+            else:
+                raise Exception("Invalid Command")
+        elif len(args) == 3:
+            if command == "read_from_file":
+                args = parse_arguments(args, ["str", "str", "int"])
+                file = get_file(file_manager, args[0])
+                return file.read(args[1], args[2])  
+            if command == "write_to_file":
+                args = parse_arguments(args, ["str", "str", "int"])
+                file = get_file(file_manager, args[0])
+                file.write_at(args[1], args[2])
+                return 'Content written!'
+        else:
+            raise Exception("Invalid Command")
+    except Exception as e:
+        return str(e)
+        # show_format()
+
+def exec_file(file_manager, thread_num):
+    input = open("./test/input_" + str(thread_num) + ".txt", "r")
+    output = open("./test/out_thread_" + str(thread_num) + ".txt", "a")
+    output.truncate(0)
+
+    for line in input:
+        res = execute_command(line.strip(), file_manager)
+        output.write(res + '\n')
+    
 # create a file manager object
 file_manager = FileManager()
+num_threads = int(sys.argv[1])
+thread_pool = []
 
-# create a loop to keep the program running
-while True:
-    try:
-        load_menu()
-        # get the user's input
-        user_input = input("Enter a command: ")
+for i in range(num_threads):
+    thread = threading.Thread(target=exec_file, args=(file_manager,i + 1))
+    thread_pool.append(thread)
+    thread.start()
 
-        # check if the user wants to exit
-        if user_input == "16":
-            # exit the program
-            break
-
-        # check if the user wants to create a new file
-        elif user_input == "1":
-            # get the file name
-            file_name = input("Enter the file name: ")
-            # create the file
-            file_manager.create_file(file_name)
-        
-        elif user_input == "2": #open a file
-            # get the file name
-            file_path = input("Enter File path: ")
-            mode = input("Enter the mode: ")
-            file = file_manager.find(file_path)
-
-            if not file or isinstance(file, DirectoryNode):
-                raise Exception("Invalid File Name")
-
-            file.mode = mode
-
-        elif user_input == "3": #close a file
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.close(file_path)
-
-        # Delete File
-        elif user_input == "4":
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.delete(file_path)
-
-        elif user_input == "5": #wtite to a file
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.find(file_path)
-
-            if not file or isinstance(file, DirectoryNode):
-                raise Exception("Invalid File Name")
-
-            if file.mode == None:
-                raise Exception("File not open! please open the file first")
-            
-            if file.mode == 'r':
-                raise Exception("File not enabled for writing!")
-            
-            else:
-                content = input("Enter the content: ")
-                file.write(content)
-
-        elif user_input == "6": # write to a file_at
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.find(file_path)
-            if file.mode == None:
-                raise Exception("File not open! please open the file first")
-            else:
-                index = int(input("Enter the index: "))
-                content = input("Enter the content: ")
-                file.write_at(content, index)
-
-        elif user_input == "7": #read a file or read from a specific index
-            file_path = input("Enter File path: ")
-            file = file_manager.find(file_path)
-            if file.mode == None:
-                raise Exception("File not open! please open the file first")
-            else:
-                index = int(input("Enter the index: "))
-                size = int(input("Enter length: "))
-                print(file.read(index, size))
-
-        elif user_input == "8": #move contents of a file within the file
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.find(file_path)
-            if file.mode == None:
-                raise Exception("File not open! please open the file first")
-            
-            elif file.mode == 'r':
-                raise Exception("File not open for writing! please open the file for writing first")
-
-            else:
-                source_index = int(input("Enter the index: "))
-                destination_index = int(input("Enter the destination index: "))
-                size = int(input("Enter the size: "))
-                file.move_content(source_index, size, destination_index)
-
-        elif user_input == "9": #truncate the size of a file
-            # get the file name
-            file_path = input("Enter File path: ")
-            file = file_manager.find(file_path)
-
-            if not file or isinstance(file, DirectoryNode):
-                raise Exception("Invalid File Name")
-
-            if file.mode == None:
-                raise Exception("File not open! please open the file first")
-            
-            if file.mode == 'r':
-                raise Exception("File not open for writing! please open the file for writing first")
-            
-            max_size = int(input("Enter the max size: "))
-            
-            if (max_size < 0):
-                raise Exception("Invalid size! (size must be greater than 0)")
-
-            file.truncate(max_size)
-        
-        elif user_input == "10": #make a directory
-            # get the directory name
-            directory_name = input("Enter the directory name: ")
-            file_manager.mkdir(directory_name)
-        
-        elif user_input == "11": #delete a directory
-            # get the directory name
-            directory_path = input("Enter the directory path: ")
-            file_manager.delete(directory_path)
-        
-        elif user_input == "12": #change directory
-            # get the directory name
-            directory_path = input("Enter the directory path: ")
-            file_manager.chDir(directory_path)
-        
-        elif user_input == "13":
-            file_manager.ls()
-
-        elif user_input == "14": #display the memory map
-            file_manager.memory_map()
-            
-        elif user_input == "15":
-            file_manager.format()
-
-        else:
-            print("Invalid command")
-
-    except Exception as e:
-        print(e)
+for thread in thread_pool:
+    thread.join()
+    print("File Processed.")

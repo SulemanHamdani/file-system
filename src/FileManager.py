@@ -68,7 +68,7 @@ class FileManager:
         if not file or isinstance(file, DirectoryNode):
             raise Exception("Invalid file path!")
 
-        if file.type == "file" and file.mode == None:
+        if file.mode == None:
             file.mode = mode
         else:
             raise Exception("FileNode is already open!")
@@ -173,5 +173,4 @@ class FileManager:
         self.save()
 
     def memory_map(self):
-        print("#### Memory Map ####")
-        print(json.dumps(self.root.get_JSON(), indent=2))
+        return json.dumps(self.root.get_JSON(), indent=2)

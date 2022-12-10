@@ -59,7 +59,7 @@ class FileNode(Entity):
         self.save()
 
     def read(self, offset=0, size=None):
-        if size <= 0 or size == None:
+        if size == None or size <= 0:
             size = self.size
 
         if self.mode == None:
