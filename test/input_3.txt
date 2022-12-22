@@ -1,0 +1,12 @@
+format
+create file3.txt
+open file3.txt w
+write_to_file file3.txt abcd
+create file4.txt
+open file4.txt w
+show_memory_map
+write_to_file file3.txt 123
+write_to_file file4.txt xyz
+close file4.txt
+close file3.txt
+show_memory_map

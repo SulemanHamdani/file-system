@@ -3,35 +3,39 @@
   "num_blocks": 20,
   "blocks": {
     "1": {
-      "content": "\"abcd\"\"123d\"xyzxyzx",
+      "content": "\"abcd\"\"abcd\"xyz13d",
       "is_full": true,
       "free_chunks": [
         {
-          "offset": 17,
+          "offset": 16,
           "limit": 20
         },
         {
-          "offset": 18,
+          "offset": 17,
           "limit": 20
         }
       ]
     },
     "2": {
-      "content": "123123123xyz",
-      "is_full": false,
+      "content": "\"123\"123123\"xzz\"xy",
+      "is_full": true,
       "free_chunks": [
         {
-          "offset": 18,
-          "limit": 20
+          "offset": 0,
+          "limit": 5
+        },
+        {
+          "offset": 14,
+          "limit": 18
         }
       ]
     },
     "3": {
-      "content": "",
+      "content": "xyz",
       "is_full": false,
       "free_chunks": [
         {
-          "offset": 0,
+          "offset": 3,
           "limit": 20
         }
       ]

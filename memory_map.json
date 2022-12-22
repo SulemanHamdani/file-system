@@ -1,24 +1,11 @@
 {
   "type": "folder",
-  "created_at": "2022-12-08 15:37:58.213881",
-  "last_modified_at": "2022-12-08 15:37:58.213881",
+  "created_at": "2022-12-22 15:27:00.444797",
+  "last_modified_at": "2022-12-22 15:27:00.444797",
   "children": {
     "file3.txt": {
-      "created_at": "2022-12-08 15:37:58.220992",
-      "last_modified_at": "2022-12-08 15:37:58.379741",
-      "type": "file",
-      "size": 3,
-      "chunks": [
-        {
-          "block_num": "1",
-          "offset": 7,
-          "limit": 10
-        }
-      ]
-    },
-    "file1.txt": {
-      "created_at": "2022-12-08 15:37:58.221665",
-      "last_modified_at": "2022-12-08 15:37:58.423737",
+      "created_at": "2022-12-13 23:11:45.994357",
+      "last_modified_at": "2022-12-13 23:11:46.071365",
       "type": "file",
       "size": 3,
       "chunks": [
@@ -29,9 +16,27 @@
         }
       ]
     },
+    "file1.txt": {
+      "created_at": "2022-12-13 23:11:45.995250",
+      "last_modified_at": "2022-12-13 23:11:46.096434",
+      "type": "file",
+      "size": 3,
+      "chunks": [
+        {
+          "block_num": "2",
+          "offset": 18,
+          "limit": 20
+        },
+        {
+          "block_num": "2",
+          "offset": 13,
+          "limit": 14
+        }
+      ]
+    },
     "file2.txt": {
-      "created_at": "2022-12-08 15:37:58.265335",
-      "last_modified_at": "2022-12-08 15:37:58.361487",
+      "created_at": "2022-12-13 23:11:46.019676",
+      "last_modified_at": "2022-12-13 23:11:46.062656",
       "type": "file",
       "size": 3,
       "chunks": [
@@ -43,22 +48,31 @@
       ]
     },
     "file4.txt": {
-      "created_at": "2022-12-08 15:37:58.311134",
-      "last_modified_at": "2022-12-08 15:37:58.440232",
+      "created_at": "2022-12-13 23:11:46.041764",
+      "last_modified_at": "2022-12-13 23:11:46.108029",
       "type": "file",
       "size": 3,
       "chunks": [
         {
-          "block_num": "1",
-          "offset": 19,
-          "limit": 20
-        },
-        {
-          "block_num": "1",
-          "offset": 16,
-          "limit": 18
+          "block_num": "3",
+          "offset": 0,
+          "limit": 3
         }
       ]
+    },
+    "newwwww.txt": {
+      "created_at": "2022-12-22 15:27:55.551005",
+      "last_modified_at": "2022-12-22 15:27:55.551005",
+      "type": "file",
+      "size": 0,
+      "chunks": []
+    },
+    "hsdiahd.txt": {
+      "created_at": "2022-12-22 15:29:56.871427",
+      "last_modified_at": "2022-12-22 15:29:56.871427",
+      "type": "file",
+      "size": 0,
+      "chunks": []
     }
   }
 }

@@ -1,151 +1,65 @@
-from FileManager import FileManager
-from Nodes import DirectoryNode
+
+# import socket programming library
+import socket
+ 
+# import thread module
+from _thread import *
 import threading
-import sys
-
-# Make a validate arguments function
-def parse_arguments(args, expected_args):
-    new_args = []
-
-    if len(args) != len(expected_args):
-        raise Exception("Invalid Arguments")
-
-    for i in range(len(args)):
-        if expected_args[i] == "int":
-            new_args.append(int(args[i]))
-        elif expected_args[i] == "str":
-            new_args.append(str(args[i]))
-        else:
-            raise Exception("Invalid Arguments")
-
-    return new_args
-
-def show_format():
-    print ("""
-        create <fname> 
-        delete <fname>
-        mkDir <dirName>
-        chDir <dirName>
-        move <source_fname, target_fname>
-        open <fName,mode>
-        close<Fname>
-        write_to_file <filename>, text
-        write_to_file <filename>,text, startLocation
-        read_from_file <filename,start,size
-        fileObj.Truncate_file maxSize
-        show_memory_map
-    """)
-
-def parse_command(command):
-    # split on spaces and commas
-    command = command.replace(",", " ")
-    command = command.split(" ")
-    # remove empty strings
-    command = list(filter(lambda x: x != "", command))
-    # return the command and the arguments
-    return (command[0], command[1:])
-
-def get_file(file_manager, name):
-    file = file_manager.find(name)
-
-    if not file or isinstance(file, DirectoryNode):
-        raise Exception("Invalid file path!")
-
-    return file
-
-def execute_command(command, file_manager):
-    command, args = parse_command(command)
-
-    try:
-        if len(args) == 0:
-            if command == "show_memory_map":
-                return file_manager.memory_map()
-            elif command == "format":
-                file_manager.format()
-                return "Memory Formatted"
-            else:
-                raise Exception("Invalid Command")
-        elif len(args) == 1:
-            if command == "create":
-                file_manager.create_file(args[0])
-                return "File Created!"
-            elif command == "delete":
-                file_manager.delete(args[0])
-                return 'File Closed'
-            elif command == "mkDir":
-                file_manager.mkdir(args[0])
-                return "Directory created"
-
-            elif command == "chDir":
-                file_manager.chDir(args[0])
-                return "CWD is now: " + args[0]
-            elif command == "close":
-                file_manager.close(args[0])
-                return "File Closed!"
-            elif command == "read_from_file":
-                file = get_file(file_manager, args[0])
-                return file.read()
-            else:
-                raise Exception("Invalid Command")
-        elif len(args) == 2:
-            if command == 'open':
-                if (args[1] != 'r' and args[1] != 'w'):
-                    raise Exception("Invalid Mode")
-                file_manager.open(args[0], args[1])
-                return 'File Opened!'
-            elif command == "move":
-                file_manager.move(args[0], args[1])
-                return 'File Moved!'
-            elif command == "write_to_file":
-                file = get_file(file_manager, args[0])
-                file.write(args[1])
-                return 'Content written!'
-            elif command == "read_from_file":
-                file = get_file(file_manager, args[0])
-                args = parse_arguments(args, ["str", "int"])
-                return file.read(args[1])
-            elif command == "truncate":
-                args = parse_arguments(args, ["str", "int"])
-                file = get_file(file_manager, args[0])
-                file.truncate(args[1])
-                return 'File truncated!'
-            else:
-                raise Exception("Invalid Command")
-        elif len(args) == 3:
-            if command == "read_from_file":
-                args = parse_arguments(args, ["str", "str", "int"])
-                file = get_file(file_manager, args[0])
-                return file.read(args[1], args[2])  
-            if command == "write_to_file":
-                args = parse_arguments(args, ["str", "str", "int"])
-                file = get_file(file_manager, args[0])
-                file.write_at(args[1], args[2])
-                return 'Content written!'
-        else:
-            raise Exception("Invalid Command")
-    except Exception as e:
-        return str(e)
-        # show_format()
-
-def exec_file(file_manager, thread_num):
-    input = open("./test/input_" + str(thread_num) + ".txt", "r")
-    output = open("./test/out_thread_" + str(thread_num) + ".txt", "a")
-    output.truncate(0)
-
-    for line in input:
-        res = execute_command(line.strip(), file_manager)
-        output.write(res + '\n')
-    
-# create a file manager object
-file_manager = FileManager()
-num_threads = int(sys.argv[1])
-thread_pool = []
-
-for i in range(num_threads):
-    thread = threading.Thread(target=exec_file, args=(file_manager,i + 1))
-    thread_pool.append(thread)
-    thread.start()
-
-for thread in thread_pool:
-    thread.join()
-    print("File Processed.")
+ 
+print_lock = threading.Lock()
+ 
+# thread function
+def threaded(c):
+    while True:
+ 
+        # data received from client
+        data = c.recv(1024)
+        if not data:
+            print('Bye')
+             
+            # lock released on exit
+            print_lock.release()
+            break
+ 
+        # reverse the given string from client
+        data = data[::-1]
+ 
+        # send back reversed string to client
+        c.send(data)
+ 
+    # connection closed
+    c.close()
+ 
+ 
+def Main():
+    host = ""
+ 
+    # reserve a port on your computer
+    # in our case it is 12345 but it
+    # can be anything
+    port = 12345
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind((host, port))
+    print("socket binded to port", port)
+ 
+    # put the socket into listening mode
+    s.listen(5)
+    print("socket is listening")
+ 
+    # a forever loop until client wants to exit
+    while True:
+ 
+        # establish connection with client
+        c, addr = s.accept()
+ 
+        # lock acquired by client
+        print_lock.acquire()
+        print('Connected to :', addr[0], ':', addr[1])
+ 
+        # Start a new thread and return its identifier
+        start_new_thread(threaded, (c,))
+    s.close()
+ 
+ 
+if __name__ == '__main__':
+    Main()
