@@ -1,19 +1,23 @@
 import socket
+import json
 
-HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 65432  # The port used by the server
+PORT = 65431  # The port used by the server
+host = input("Host IP: ")
+username = input("Username: ")
 
-while True:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:     
-        s.connect((HOST, PORT))
-        command = input("Command: ")
-        s.sendall(bytes(command, 'utf-8'))
+with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+    s.connect((host, PORT))
+    s.send(bytes(f"username {username}", "utf-8"))
+
+    while True:
         data = s.recv(1024)
-        # convert bytes to string
-        data = data.decode("utf-8")
-        if (data == '$_exit_$'):
-            print('Exiting...')
+        data = data.decode("utf-8").replace("\\n", "\n")
+
+        if data == "$$_exit_$$":
             break
-        print(f"Received {data!r}")
 
+        print(data, end="")
+        command = input()
+        s.send(bytes(command, "utf-8"))
 
+    s.close()

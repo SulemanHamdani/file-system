@@ -126,9 +126,7 @@ class FileManager:
                 dir = DirectoryNode(token=child)
                 folder.add(dir)
 
-                dir.created_at = datetime.datetime.strptime(
-                    children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f"
-                )
+                dir.created_at = datetime.datetime.strptime(children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f")
 
                 dir.last_modified_at = datetime.datetime.strptime(
                     children[child]["last_modified_at"], "%Y-%m-%d %H:%M:%S.%f"
@@ -139,21 +137,15 @@ class FileManager:
                     children[child]["children"],
                 )
             else:
-                file = FileNode(
-                    token=child, memory_manager=self.memory_manager, file_manager=self
-                )
+                file = FileNode(token=child, memory_manager=self.memory_manager, file_manager=self)
 
                 file.size = children[child]["size"]
                 file.chunks = []
 
                 for chunk in children[child]["chunks"]:
-                    file.chunks.append(
-                        Memory(chunk["block_num"], chunk["offset"], chunk["limit"])
-                    )
+                    file.chunks.append(Memory(chunk["block_num"], chunk["offset"], chunk["limit"]))
 
-                file.created_at = datetime.datetime.strptime(
-                    children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f"
-                )
+                file.created_at = datetime.datetime.strptime(children[child]["created_at"], "%Y-%m-%d %H:%M:%S.%f")
 
                 file.last_modified_at = datetime.datetime.strptime(
                     children[child]["last_modified_at"], "%Y-%m-%d %H:%M:%S.%f"

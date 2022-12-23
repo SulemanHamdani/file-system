@@ -1,7 +1,7 @@
 {
   "type": "folder",
-  "created_at": "2022-12-22 15:27:00.444797",
-  "last_modified_at": "2022-12-22 15:27:00.444797",
+  "created_at": "2022-12-23 11:59:37.717823",
+  "last_modified_at": "2022-12-23 11:59:37.717823",
   "children": {
     "file3.txt": {
       "created_at": "2022-12-13 23:11:45.994357",
@@ -73,6 +73,27 @@
       "type": "file",
       "size": 0,
       "chunks": []
+    },
+    "tst.txt": {
+      "created_at": "2022-12-23 12:03:08.730387",
+      "last_modified_at": "2022-12-23 12:03:08.730378",
+      "type": "file",
+      "size": 0,
+      "chunks": []
+    },
+    "sule": {
+      "type": "folder",
+      "created_at": "2022-12-23 12:03:29.295104",
+      "last_modified_at": "2022-12-23 12:03:29.295104",
+      "children": {
+        "sule.jpg": {
+          "created_at": "2022-12-23 12:03:44.272212",
+          "last_modified_at": "2022-12-23 12:03:44.272200",
+          "type": "file",
+          "size": 0,
+          "chunks": []
+        }
+      }
     }
   }
 }
