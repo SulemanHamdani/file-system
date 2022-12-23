@@ -1,4 +1,5 @@
 from Nodes import DirectoryNode
+from User import User
 
 # Make a validate arguments function
 def parse_arguments(args, expected_args):
