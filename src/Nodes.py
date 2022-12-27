@@ -1,6 +1,7 @@
 import datetime
 import os
 import json
+import threading
 
 
 class Entity:
@@ -24,6 +25,41 @@ class FileNode(Entity):
         self.content = ""
         self.memory_manager = memory_manager
         self.file_manager = file_manager
+        self.readers = 0 
+        self.mutex = threading.Semaphore()
+        self.wrt = threading.Semaphore()
+
+    def request_read(self):
+        self.mutex.acquire()
+        self.readers = self.readers + 1
+
+        # if atleast one reader in critical section no writer can enter (preference to readers) 
+        if(self.readers >= 0 ): 
+            self.wrt.acquire()
+            print("Readers are present in critical section.")
+
+        self.mutex.release() # other readers can enter
+
+    def release_reader(self):
+        self.mutex.acquire() # reader wants to leave
+        self.readers = self.readers - 1
+
+        if (self.readers == 0): self.wrt.release();  # writers can enter if no readers left in critical section
+        
+        self.mutex.release() # reader leaves
+        print("Reading Complete. Now leaving critical section.")
+
+    def request_write(self):
+        # if not self.w_queue.empty(): # if other writers in queue 
+        #     self.w_queue.put(thread_obj) # add writer to queue
+        #     print(f"Write Access Denied. {thread_obj.name} added to wating queue.")
+
+        self.wrt.acquire() # wait for write semaphore to be free
+
+    def release_writer(self):
+        print("Write Complete. Now leaving critical section.")
+        self.wrt.release()
+        # self.w_queue.get() # removing thread from queue when done writing
 
     def get_content(self):
         self.content = ""
@@ -37,6 +73,8 @@ class FileNode(Entity):
         if self.mode != "w":
             raise Exception("File not enabled for writing!")
 
+        self.request_write()
+
         self.content = content
         self.save()
 
@@ -46,7 +84,9 @@ class FileNode(Entity):
 
         if offset > self.size:
             raise Exception("Invalid offset!")
-            
+
+        self.request_write()
+
         txt = self.get_content()
         self.content = txt[:offset] + content + txt[offset:]
         self.save()
@@ -54,6 +94,8 @@ class FileNode(Entity):
     def append(self, content):
         if self.mode != "w":
             raise Exception("File not enabled for writing!")
+
+        self.request_write()
 
         self.content += content
         self.save()
@@ -64,11 +106,15 @@ class FileNode(Entity):
 
         if self.mode == None:
             raise Exception("File not open!")
+        
+        self.request_read()
 
         return self.get_content()[offset : min(offset + size, self.size)]
 
     def move_content(self, source_index, size, destination_index):
         if self.mode == "w":
+            self.request_write()
+
             txt = self.get_content()
 
             if source_index + size > len(txt):
@@ -94,6 +140,7 @@ class FileNode(Entity):
 
     def truncate(self, max_size):
         if self.mode == "w":
+            self.request_write()
             self.content = self.get_content()[:max_size]
             self.save()
         else:

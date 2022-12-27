@@ -102,6 +102,11 @@ class FileManager:
         if not file or isinstance(file, DirectoryNode):
             raise Exception("Invalid file path!")
 
+        # release locks when file closed
+        if file.mode == 'w':
+            file.release_writer()
+        file.release_reader()
+
         if file:
             file.mode = None
         else:
