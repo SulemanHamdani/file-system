@@ -2,7 +2,7 @@ import socket
 import threading
 
 from _thread import start_new_thread
-from FileManager import FileManager
+from FileSystem import FileManager
 from execute import execute_command
 
 HOST = ""
