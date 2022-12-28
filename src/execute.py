@@ -137,13 +137,3 @@ def execute_command(command, file_manager, user: User):
             raise Exception("Invalid Command")
     except Exception as e:
         return f"Error: {e}. Try --help to view format"
-
-
-def exec_file(file_manager, thread_num):
-    input = open("./test/input_" + str(thread_num) + ".txt", "r")
-    output = open("./test/out_thread_" + str(thread_num) + ".txt", "a")
-    output.truncate(0)
-
-    for line in input:
-        res = execute_command(line.strip(), file_manager)
-        output.write(res + "\n")
