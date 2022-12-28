@@ -2,6 +2,7 @@ from MemoryManager import MemoryManager, Memory
 from Nodes import FileNode, DirectoryNode
 import json
 import datetime
+import threading
 
 
 class OpenedFile:
@@ -30,7 +31,7 @@ class FileManager:
         self.root = DirectoryNode(token="~")
         self.cwd = self.root
         self.memory_manager = MemoryManager()
-
+        self.save_lock = threading.Semaphore()
         file = open("memory_map.json", "r")
         data = json.load(file)
         self.load_children(self.root, data["children"])
@@ -89,11 +90,7 @@ class FileManager:
         if not file or isinstance(file, DirectoryNode):
             raise Exception("Invalid file path!")
 
-        if file.mode == None:
-            file.mode = mode
-        else:
-            raise Exception("FileNode is already open!")
-
+        file.open(mode)
         return file
 
     def close(self, path):
@@ -102,15 +99,7 @@ class FileManager:
         if not file or isinstance(file, DirectoryNode):
             raise Exception("Invalid file path!")
 
-        # release locks when file closed
-        if file.mode == 'w':
-            file.release_writer()
-        file.release_reader()
-
-        if file:
-            file.mode = None
-        else:
-            raise Exception("File not found!")
+        file.close()
 
     def ls(self):
         self.cwd.ls()
@@ -180,9 +169,11 @@ class FileManager:
                 folder.add(file)
 
     def save(self):
+        self.save_lock.acquire()
         file = open("memory_map.json", "w")
         file.write(json.dumps(self.root.get_JSON(), indent=2))
         file.close()
+        self.save_lock.release()
 
     def format(self):
         self.memory_manager.format_drive()

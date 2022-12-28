@@ -10,7 +10,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.send(bytes(f"username {username}", "utf-8"))
 
     while True:
-        data = s.recv(1024)
+        data = s.recv(1048576)
         data = data.decode("utf-8").replace("\\n", "\n")
 
         if data == "$$_exit_$$":

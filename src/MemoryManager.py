@@ -112,9 +112,7 @@ class MemoryManager:
         drive.close()
 
     def get_content(self, memory_chunk):
-        return self.blocks[str(memory_chunk.block_num)]["content"][
-            memory_chunk.offset : memory_chunk.limit
-        ]
+        return self.blocks[str(memory_chunk.block_num)]["content"][memory_chunk.offset : memory_chunk.limit]
 
     def write_content(self, memory_chunks, content):
         start = 0
@@ -125,9 +123,7 @@ class MemoryManager:
             original_content = self.blocks[chunk.block_num]["content"]
 
             self.blocks[chunk.block_num]["content"] = (
-                original_content[: chunk.offset]
-                + content[start : start + chunk_size]
-                + original_content[chunk.limit :]
+                original_content[: chunk.offset] + content[start : start + chunk_size] + original_content[chunk.limit :]
             )
             start += chunk_size
 

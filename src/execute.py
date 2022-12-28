@@ -75,7 +75,7 @@ def execute_command(command, file_manager):
                 return "File Created!"
             elif command == "delete":
                 file_manager.delete(args[0])
-                return "File Closed"
+                return "File Deleted"
             elif command == "mkDir":
                 file_manager.mkdir(args[0])
                 return "Directory created"
