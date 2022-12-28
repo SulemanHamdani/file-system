@@ -1,7 +1,6 @@
 import socket
-import json
 
-PORT = 65432  # The port used by the server
+PORT = 95  # The port used by the server
 host = input("Host IP: ")
 username = input("Username: ")
 

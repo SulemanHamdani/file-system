@@ -4,7 +4,7 @@ from FileSystem import FileManager, User
 from execute import execute_command
 
 HOST = ""
-PORT = 65432
+PORT = 95
 MAX_CONNECTIONS = 5
 host_name = socket.gethostname()
 host_ip = socket.gethostbyname(host_name)
@@ -48,5 +48,6 @@ def main():
         conn, addr = s.accept()
         print("Connected to :", addr[0], ":", addr[1])
         start_new_thread(threaded, (conn,))
+
 
 main()
