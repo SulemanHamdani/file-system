@@ -55,7 +55,7 @@ def get_file(file_manager, name):
     return file
 
 
-def execute_command(command, file_manager):
+def execute_command(command, file_manager, user: User):
     command, args = parse_command(command)
 
     try:
@@ -83,7 +83,10 @@ def execute_command(command, file_manager):
                 file_manager.chDir(args[0])
                 return "CWD is now: " + args[0]
             elif command == "close":
-                file_manager.close(args[0])
+                file = user.find_opened_file(args[0])
+                if file:
+                    file_manager.close(args[0])
+                    user.close_file(args[0])
                 return "File Closed!"
             elif command == "read_from_file":
                 file = get_file(file_manager, args[0])
@@ -94,7 +97,13 @@ def execute_command(command, file_manager):
             if command == "open":
                 if args[1] != "r" and args[1] != "w":
                     raise Exception("Invalid Mode")
-                file_manager.open(args[0], args[1])
+
+                file = user.find_opened_file(args[0])
+
+                if not file:
+                    file = file_manager.open(args[0], args[1])
+                    user.open_file(file, args[1])
+
                 return "File Opened!"
             elif command == "move":
                 file_manager.move(args[0], args[1])

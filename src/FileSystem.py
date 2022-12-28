@@ -5,25 +5,26 @@ import datetime
 import threading
 
 
-class OpenedFile:
-    def __init__(self, file, mode):
-        self.file = file
-        self.mode = mode
-
-
 class User:
     def __init__(self, name):
         self.name = name
         self.opened_files = []
 
     def open_file(self, file, mode):
-        self.opened_files.append(OpenedFile(file, mode))
+        self.opened_files.append(file)
 
-    def close_file(self, file):
+    def close_file(self, fileName):
+        file = self.find_opened_file(fileName)
+
+        if file:
+            self.opened_files.remove(file)
+
+    def find_opened_file(self, fileName):
         for opened_file in self.opened_files:
-            if opened_file.file == file:
-                self.opened_files.remove(opened_file)
-                return
+            if opened_file.token == fileName:
+                return opened_file
+
+        return None
 
 
 class FileManager:

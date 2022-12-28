@@ -2,17 +2,18 @@ import socket
 import threading
 
 from _thread import start_new_thread
-from FileSystem import FileManager, User, OpenedFile
+from FileSystem import FileManager, User
 from execute import execute_command
 
 HOST = ""
-PORT = 65431
+PORT = 65432
 host_name = socket.gethostname()
 file_manager = FileManager()
 # thread function
 def threaded(conn):
     username = ""
     response = ""
+    user = None
 
     while True:
         command = conn.recv(1024)
@@ -20,11 +21,12 @@ def threaded(conn):
 
         if command.startswith("username"):
             username = command.split(" ")[1]
+            user = User(username)
         elif command == "exit":
             conn.send(bytes("$$_exit_$$", "utf-8"))
             break
         else:
-            response = execute_command(command, file_manager)
+            response = execute_command(command, file_manager, user)
 
         conn.send(bytes(response, "utf-8"))
         conn.send(bytes(f"\n{username}@{host_name}:", "utf-8"))
